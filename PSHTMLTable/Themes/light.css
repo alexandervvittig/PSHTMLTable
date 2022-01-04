@@ -1,0 +1,44 @@
+body {
+    color: #333333;
+    font-family: Calibri,Tahoma,Arial,Verdana;
+    font-size: 11pt;
+    margin: 0px;
+    padding: 0px;
+}
+h3 {
+    margin: 5px 0px 5px 0px;
+}
+h4 {
+    margin: 0px;
+}
+table {
+    border-collapse: collapse;
+}
+tr.last-child {
+    border-bottom: 1px solid black;
+}
+th {
+    text-align: center;
+    font-weight: bold;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space: nowrap;
+    padding: 0px 10px 0px 10px;
+}
+th.align-left {
+    text-align: left;
+}
+td {
+    padding: 2px 10px 2px 10px;
+    text-align: center;
+    white-space: nowrap;
+}
+td.bold {
+    font-weight: bold;
+}
+.odd {
+    background-color: #dddddd;
+}
+.even {
+    background-color: #ffffff;
+}

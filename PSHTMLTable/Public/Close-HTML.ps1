@@ -1,85 +1,58 @@
 ﻿function Close-HTML {
-    <# 
-    .SYNOPSIS 
-    Close out the body and html tags
- 
-    .DESCRIPTION 
-    Close out the body and html tags
- 
-    .PARAMETER  HTML 
-    HTML string to work with
+    <#
+    .SYNOPSIS
+    Closes </body> and </html> entities to complete the HTML data stream.
 
-    .PARAMETER Decode
-    If specified, run HTML string through HtmlDecode
+    .DESCRIPTION
+    Closes </body> and </html> entities to complete the HTML data stream.
+
+    .PARAMETER HTML
+    HTML string to analyze.
+
+    .PARAMETER HTMLDecode
+    If specified, sends HTML data to HtmlDecode to convert html specific characters like < or > to their character entity
+
+    .PARAMETER Validate
+    If specified, HTML data is parsed to look for malformed data. If HTML data is properly formed, results are indented accordlingly
 
     .EXAMPLE
-    #This example requires and demonstrates using the New-HTMLHead, New-HTMLTable, Add-HTMLTableColor, ConvertTo-PropertyValue and Close-HTML functions.
-    
-    #get processes to work with
-        $processes = Get-Process
-    
-    #Build HTML header
-        $HTML = New-HTMLHead -title "Process details"
+    Sample scripts can be found in the "Examples" folder off of the module's root path
 
-    #Add CPU time section with top 10 PrivateMemorySize processes.  This example does not highlight any particular cells
-        $HTML += "<h3>Process Private Memory Size</h3>"
-        $HTML += New-HTMLTable -inputObject $($processes | sort PrivateMemorySize -Descending | select name, PrivateMemorySize -first 10)
-
-    #Add Handles section with top 10 Handle usage.
-    $handleHTML = New-HTMLTable -inputObject $($processes | sort handles -descending | select Name, Handles -first 10)
-
-        #Add highlighted colors for Handle count
-            
-            #build hash table with parameters for Add-HTMLTableColor.  Argument and AttrValue will be modified each time we run this.
-            $params = @{
-                Column = "Handles" #I'm looking for cells in the Handles column
-                ScriptBlock = {[double]$args[0] -gt [double]$args[1]} #I want to highlight if the cell (args 0) is greater than the argument parameter (arg 1)
-                Attr = "Style" #This is the default, don't need to actually specify it here
-            }
-
-            #Add yellow, orange and red shading
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 1500 -attrValue "background-color:#FFFF99;" @params
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 2000 -attrValue "background-color:#FFCC66;" @params
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 3000 -attrValue "background-color:#FFCC99;" @params
-      
-        #Add title and table
-        $HTML += "<h3>Process Handles</h3>"
-        $HTML += $handleHTML
-
-    #Add process list containing first 10 processes listed by get-process.  This example does not highlight any particular cells
-        $HTML += New-HTMLTable -inputObject $($processes | select name -first 10 ) -listTableHead "Random Process Names"
-
-    #Add property value table showing details for PowerShell ISE
-        $HTML += "<h3>PowerShell Process Details PropertyValue table</h3>"
-        $processDetails = Get-process powershell_ise | select name, id, cpu, handles, workingset, PrivateMemorySize, Path -first 1
-        $HTML += New-HTMLTable -inputObject $(ConvertTo-PropertyValue -inputObject $processDetails)
-
-    #Add same PowerShell ISE details but not in property value form.  Close the HTML
-        $HTML += "<h3>PowerShell Process Details object</h3>"
-        $HTML += New-HTMLTable -inputObject $processDetails | Close-HTML
-
-    #write the HTML to a file and open it up for viewing
-        set-content C:\test.htm $HTML
-        & 'C:\Program Files\Internet Explorer\iexplore.exe' C:\test.htm
-
-    .FUNCTIONALITY
-    General Command
+	.NOTES
+	Author: brandon said
     #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [String]$HTML,
 
-    [cmdletbinding()]
-    param(
-        [Parameter( Mandatory=$true,  
-            ValueFromPipeline=$true,
-            ValueFromPipelineByPropertyName=$false)]  
-        [string]$HTML,
+        [Parameter(Mandatory = $false)]
+        [Alias('Decode')]
+        [Switch]$HTMLDecode,
 
-        [switch]$Decode
+        [Parameter(Mandatory = $false)]
+        [Alias('Format')]
+        [Switch]$Validate
     )
-    #Thanks to ‏@ashyoungblood!
-    if($Decode)
-    {
-        Add-Type -AssemblyName System.Web
-        $HTML = [System.Web.HttpUtility]::HtmlDecode($HTML)
+
+    begin {
+        #Requires -Version 2.0
+        Add-Type -AssemblyName System.Xml.Linq | Out-Null
     }
-    "$HTML </body></html>"
+
+    process {
+        if ($HTMLDecode) {
+            Add-Type -AssemblyName System.Web
+            $HTML = [System.Web.HttpUtility]::HtmlDecode($HTML)
+        }
+        if ($Validate) {
+            try {
+                [System.Xml.Linq.XDocument]::Parse($HTML + "</body></html>").ToString()
+            } catch {
+                throw $_
+            }
+        } else {
+            $HTML + "</body></html>"
+        }
+    }
 }

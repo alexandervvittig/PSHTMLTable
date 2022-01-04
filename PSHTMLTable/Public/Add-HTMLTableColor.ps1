@@ -1,193 +1,218 @@
 ﻿function Add-HTMLTableColor {
-    <# 
-    .SYNOPSIS 
-    Colorize cells or rows in an HTML table, or add other inline CSS
- 
-    .DESCRIPTION 
-    Colorize cells or rows in an HTML table, or add other inline CSS
- 
-    .PARAMETER  HTML 
-    HTML string to work with
+    <#
+    .SYNOPSIS
+    Colorize cells or rows in an HTML table, or add other inline CSS.
 
-    .PARAMETER  Column 
-    If specified, the column you want to modify.  This is case sensitive
+    .DESCRIPTION
+    Colorize cells or rows in an HTML table, or add other inline CSS.
 
-    .PARAMETER  Argument 
-    If Column is specified, this argument can be used to compare with current cell.
+    .PARAMETER HTML
+    HTML string to analyze.
+
+    .PARAMETER Column
+    If specified, the column you want to analyze. This is case sensitive.
+
+    .PARAMETER SecondColumn
+    If specified, the column you want to use as a reference column to analyze against Column. This is case sensitive.
+
+    .PARAMETER Argument
+    If Column is specified, argument is used as a comparison value for Column.
 
     .PARAMETER ScriptBlock
-    If Column is specified, used to evaluate whether to colorize a cell.  If the scriptblock returns $true the cell will be colorized.
-   
-    $args[0] is the existing cell value in the table
-    $args[1] is your Argument parameter
+    If Column is specified, used to evaluate whether to add the CSS or not. If the ScriptBlock returns $true, the specified CSSAtribute and CSSAtributeValue will be added.
+
+    $args[0] is the existing cell value
+    $args[1] is the argument parameter
 
     Examples:
-        {[string]$args[0] -eq [string]$args[1]} #existing cell value equals Argument.  This is the default
-        {[double]$args[0] -gt [double]$args[1]} #existing cell value is greater than Argument.
+        {[string]$args[0] -eq [string]$args[1]} # specified Column value equals Argument. This is the default.
+        {[double]$args[0] -gt [double]$args[1]} # specified Column value is greater than Argument.
 
-    Use strong typesetting if possible.
- 
-    .PARAMETER  Attr 
-    If Column is specified, the attribute to change should ColumnValue be found in the Column specified or if the ScriptBlock is true.  Default:  Style
- 
-    .PARAMETER  AttrValue 
-    If Column is specified, the attribute value to set when the ColumnValue is found in the Column specified or if the ScriptBlock is true.
-    
-    Example: "background-color:#FFCC99;" 
- 
-    .PARAMETER WholeRow
-    If specified, and Column is specified, set the Attr and AttrValue for the entire row, not just a cell.
+    .PARAMETER  CSSAttribute
+    If Column is specified, the attribute to change if the ScriptBlock returns true. Default: style
 
-    .EXAMPLE
-    #This example requires and demonstrates using the New-HTMLHead, New-HTMLTable, Add-HTMLTableColor, ConvertTo-PropertyValue and Close-HTML functions.
-    
-    #get processes to work with
-        $processes = Get-Process
-    
-    #Build HTML header
-        $HTML = New-HTMLHead -title "Process details"
+    .PARAMETER  CSSAttributeValue
+    If Column is specified, the attribute value to change if the ScriptBlock returns true.
 
-    #Add CPU time section with top 10 PrivateMemorySize processes.  This example does not highlight any particular cells
-        $HTML += "<h3>Process Private Memory Size</h3>"
-        $HTML += New-HTMLTable -inputObject $($processes | sort PrivateMemorySize -Descending | select name, PrivateMemorySize -first 10)
+    Example: "background-color:#FFCC99;"
 
-    #Add Handles section with top 10 Handle usage.
-    $handleHTML = New-HTMLTable -inputObject $($processes | sort handles -descending | select Name, Handles -first 10)
+    .PARAMETER HighlightRow
+    If specified, and Column is specified, and the ScriptsBlock returns true, CSSAttribute and CSSAttributeValue is applied to the entire row, not just the cell.
 
-        #Add highlighted colors for Handle count
-            
-            #build hash table with parameters for Add-HTMLTableColor.  Argument and AttrValue will be modified each time we run this.
-            $params = @{
-                Column = "Handles" #I'm looking for cells in the Handles column
-                ScriptBlock = {[double]$args[0] -gt [double]$args[1]} #I want to highlight if the cell (args 0) is greater than the argument parameter (arg 1)
-                Attr = "Style" #This is the default, don't need to actually specify it here
-            }
+    .PARAMETER HighlightReferenceCell
+    If specified, and Column and SecondColumn are specified, and the ScriptsBlock returns true, CSSAttribute and CSSAttributeValue is applied to both Column and SecondColumn cells.
 
-            #Add yellow, orange and red shading
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 1500 -attrValue "background-color:#FFFF99;" @params
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 2000 -attrValue "background-color:#FFCC66;" @params
-            $handleHTML = Add-HTMLTableColor -HTML $handleHTML -Argument 3000 -attrValue "background-color:#FFCC99;" @params
-      
-        #Add title and table
-        $HTML += "<h3>Process Handles</h3>"
-        $HTML += $handleHTML
+	.PARAMETER ApplyFormat
+    If specified, format the cell data post ScriptBlock evaluation. This should be added to the last evaluation as it will change the data and possibly make further evaluations fail.
 
-    #Add process list containing first 10 processes listed by get-process.  This example does not highlight any particular cells
-        $HTML += New-HTMLTable -inputObject $($processes | select name -first 10 ) -listTableHead "Random Process Names"
+	.PARAMETER StringFormat
+    If specified, uses the -f parameter to format the cell data. For example, "{0:n2)" will format data as 2 decimal digits, 89.2349862972638476 will become 89.23.
 
-    #Add property value table showing details for PowerShell ISE
-        $HTML += "<h3>PowerShell Process Details PropertyValue table</h3>"
-        $processDetails = Get-process powershell_ise | select name, id, cpu, handles, workingset, PrivateMemorySize, Path -first 1
-        $HTML += New-HTMLTable -inputObject $(ConvertTo-PropertyValue -inputObject $processDetails)
+	.PARAMETER CommandFormat
+    If specified, passes a locally defined command to be used to format the cell data.
 
-    #Add same PowerShell ISE details but not in property value form.  Close the HTML
-        $HTML += "<h3>PowerShell Process Details object</h3>"
-        $HTML += New-HTMLTable -inputObject $processDetails | Close-HTML
+	Examples:
+		${function:Format-Bytes}
 
-    #write the HTML to a file and open it up for viewing
-        set-content C:\test.htm $HTML
-        & 'C:\Program Files\Internet Explorer\iexplore.exe' C:\test.htm
+		Where Format-Bytes is defined as:
+
+		function Format-Bytes ($Bytes) {
+			# Do Stuff
+			return $results
+		}
 
     .EXAMPLE
-    # Table with the 20 most recent events, highlighting error and warning rows
+    Sample scripts can be found in the "Examples" folder off of the module's root path
 
-        #gather 20 events from the system log and pick out a few properties
-        $events = Get-EventLog -LogName System -Newest 20 | select TimeGenerated, Index, EntryType, UserName, Message
+	.NOTES
+	Author: brandon said
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [String]$HTML,
 
-    #Create the HTML table without alternating rows, colorize Warning and Error messages, highlighting the whole row.
-        $eventTable = $events | New-HTMLTable -setAlternating $false |
-            Add-HTMLTableColor -Argument "Warning" -Column "EntryType" -AttrValue "background-color:#FFCC66;" -WholeRow |
-            Add-HTMLTableColor -Argument "Error" -Column "EntryType" -AttrValue "background-color:#FFCC99;" -WholeRow
+        [Parameter(Mandatory = $false)]
+        [String]$Column = "Name",
 
-    #Build the HTML head, add an h3 header, add the event table, and close out the HTML
-        $HTML = New-HTMLHead
-        $HTML += "<h3>Last 20 System Events</h3>"
-        $HTML += $eventTable | Close-HTML
+        [Parameter(Mandatory = $false)]
+        [String]$SecondColumn = "",
 
-    #test it out
-        set-content C:\test.htm $HTML
-        & 'C:\Program Files\Internet Explorer\iexplore.exe' C:\test.htm
+        [Parameter(Mandatory = $false)]
+        $Argument = 0,
 
-    .NOTES 
-    Props to Zachary Loeber and Jaykul for the idea and help:
-    http://gallery.technet.microsoft.com/scriptcenter/Colorize-HTML-Table-Cells-2ea63acd
-    http://stackoverflow.com/questions/4559233/technique-for-selectively-formatting-data-in-a-powershell-pipeline-and-output-as
-
-    I believe that .Net 3.5 is a requirement for using the Linq libraries
-    
-    .FUNCTIONALITY
-    General Command
-    #> 
-    [CmdletBinding()] 
-    param ( 
-        [Parameter( Mandatory=$true,  
-                ValueFromPipeline=$true,
-                ValueFromPipelineByPropertyName=$false)]  
-        [string]$HTML,
-        
-        [Parameter( Mandatory=$false, 
-                    ValueFromPipeline=$false)]
-        [String]$Column="Name",
-        
-        [Parameter( Mandatory=$false,
-                    ValueFromPipeline=$false)]
-        $Argument=0,
-        
-        [Parameter( ValueFromPipeline=$false)]
+        [Parameter(Mandatory = $false)]
         [ScriptBlock]$ScriptBlock = {[string]$args[0] -eq [string]$args[1]},
-        
-        [Parameter( ValueFromPipeline=$false)]
-        [String]$Attr = "style",
-        
-        [Parameter( Mandatory=$true, 
-                    ValueFromPipeline=$false)] 
-        [String]$AttrValue,
-        
-        [Parameter( Mandatory=$false, 
-                    ValueFromPipeline=$false)] 
-        [switch]$WholeRow=$false
 
-        )
-    
-        #requires -version 2.0
-        add-type -AssemblyName System.xml.linq | out-null
+        [Parameter(Mandatory = $false)]
+		[Alias('Attr')]
+        [String]$CSSAttribute = "style",
 
-        # Convert our data to x(ht)ml  
-        $xml = [System.Xml.Linq.XDocument]::Parse($HTML)   
-        
-        #Get column index.  try th with no namespace first, then default namespace provided by convertto-html
-        try{ 
-            $columnIndex = (($xml.Descendants("th") | Where-Object { $_.Value -eq $Column }).NodesBeforeSelf() | Measure-Object).Count 
-        }
-        catch { 
-            Try {
-                $columnIndex = (($xml.Descendants("{http://www.w3.org/1999/xhtml}th") | Where-Object { $_.Value -eq $Column }).NodesBeforeSelf() | Measure-Object).Count
-            }
-            Catch {
-                Throw "Error:  Namespace incorrect."
-            }
-        }
+        [Parameter(Mandatory = $false)]
+		[Alias('AttrValue')]
+		[String]$CSSAttributeValue,
 
-        #if we got the column index...
-        if($columnIndex -as [double] -ge 0){
-            
-            #take action on td descendents matching that index
-            switch($xml.Descendants("td") | Where { ($_.NodesBeforeSelf() | Measure).Count -eq $columnIndex })
-            {
-                #run the script block.  If it is true, set attributes
-                {$(Invoke-Command $ScriptBlock -ArgumentList @($_.Value, $Argument))} { 
-                    
-                    #mark the whole row or just a cell depending on param
-                    if ($WholeRow)  { 
-                        $_.Parent.SetAttributeValue($Attr, $AttrValue) 
-                    } 
-                    else { 
-                        $_.SetAttributeValue($Attr, $AttrValue) 
-                    }
-                }
-            }
-        }
-        
-        #return the XML
-        $xml.Document.ToString() 
+        [Parameter(Mandatory = $false)]
+		[Alias('WholeRow')]
+		[Switch]$HighlightRow = $false,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]$HighlightReferenceCell = $false,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]$ApplyFormat = $false,
+
+        [Parameter(Mandatory = $false)]
+        [String]$StringFormat = "",
+
+        [Parameter(Mandatory = $false)]
+		[ScriptBlock]$CommandFormat = {}
+	)
+
+	begin {
+		#Requires -Version 2.0
+		Add-Type -AssemblyName System.Xml.Linq | Out-Null
+	}
+
+	process {
+		# Convert our data to x(ht)ml
+		if ($HTML.StartsWith("<table>`r`n") -and $HTML.EndsWith("`r`n</table>")) {
+			$Xml = [System.Xml.Linq.XDocument]::Parse($HTML)
+		} else {
+			$NestedTable = $true
+			$HTML = "<table>$HTML</table>"
+			$Xml = [System.Xml.Linq.XDocument]::Parse($HTML)
+		}
+
+		# Get Column index. Try th with no namespace first, then default namespace provided by ConvertTo-Html.
+		try {
+			$ColumnIndex = (($Xml.Descendants("th") | Where-Object { $_.Value -eq $Column }).NodesBeforeSelf() | Measure-Object).Count
+		}
+		catch {
+			try {
+				$ColumnIndex = (($Xml.Descendants("{http://www.w3.org/1999/xhtml}th") | Where-Object { $_.Value -eq $Column }).NodesBeforeSelf() | Measure-Object).Count
+			}
+			catch {
+				throw "Error: Invalid Column Name ($Column)."
+			}
+		}
+		# Get SecondColumn index. Try th with no namespace first, then default namespace provided by ConvertTo-Html.
+		if ($SecondColumn -ne "") {
+			try {
+				$SecondColumnIndex = (($Xml.Descendants("th") | Where-Object { $_.Value -eq $SecondColumn }).NodesBeforeSelf() | Measure-Object).Count
+			}
+			catch {
+				try {
+					$SecondColumnIndex = (($Xml.Descendants("{http://www.w3.org/1999/xhtml}th") | Where-Object { $_.Value -eq $SecondColumn }).NodesBeforeSelf() | Measure-Object).Count
+				}
+				catch {
+					throw "Error: Invalid Column Name ($SecondColumn)."
+				}
+			}
+		}
+		# If we found the specified column index and no second column exists
+		if (($ColumnIndex -as [double] -ge 0) -and ($SecondColumnIndex -as [double] -eq 0)) {
+			# Take action on td descendants matching that index
+			switch ($Xml.Descendants("td") | Where-Object {($_.NodesBeforeSelf() | Measure-Object).Count -eq $ColumnIndex}) {
+				# Run the script block. If it is true, set attributes
+				{Invoke-Command $ScriptBlock -ArgumentList @($_.Value, $Argument)} {
+					# Mark the whole row or just the column
+					if ($HighlightRow)  {
+						$_.Parent.SetAttributeValue($CSSAttribute, $CSSAttributeValue)
+					} else {
+						$_.SetAttributeValue($CSSAttribute, $CSSAttributeValue)
+						if ($ApplyFormat) {
+							if ($StringFormat -ne "") {
+								$_.Value = $StringFormat -f $([double]$_.Value)
+							} elseif ($CommandFormat -ne "") {
+								$_.Value = Invoke-Command -ScriptBlock $CommandFormat -ArgumentList $_.Value
+							}
+						}
+					}
+				}
+				default {
+					if ($ApplyFormat) {
+						if (-not ($StringFormat -ne "" -and $CommandFormat.Ast.Extent.Text -ne '{}')) {
+							if ($StringFormat -ne "") {
+								$_.Value = $StringFormat -f $([double]$_.Value)
+							} elseif ($CommandFormat -ne "") {
+								$_.Value = Invoke-Command -ScriptBlock $CommandFormat -ArgumentList $_.Value
+							}
+						} else {
+							throw "Error: Multiple format methods specified on Column ($Column)."
+						}
+					}
+				}
+			}
+		# If we found both column and second column indexes
+		} else {
+			# Iterate each table row
+			foreach ($XmlTr in $($Xml.Descendants("tr"))) {
+				# Take action on td descendants matching column index
+				switch ($XmlTr.Descendants("td") | Where-Object {($_.NodesBeforeSelf() | Measure-Object).Count -eq $ColumnIndex}) {
+					# Run the script block. If it is true, set attributes
+					{$(Invoke-Command $ScriptBlock -ArgumentList @(@($($XmlTr.Descendants("td")))[$ColumnIndex].Value, @($($XmlTr.Descendants("td")))[$SecondColumnIndex].Value))} {
+						# Mark the whole row or just the column
+						if ($HighlightRow)  {
+							$_.Parent.SetAttributeValue($CSSAttribute, $CSSAttributeValue)
+							# Remove attribute if previously set by another condition
+							$_.SetAttributeValue($CSSAttribute, $null)
+						} else {
+							$_.SetAttributeValue($CSSAttribute, $CSSAttributeValue)
+							if ($HighlightReferenceCell) {
+								@($($XmlTr.Descendants("td")))[$SecondColumnIndex].SetAttributeValue($CSSAttribute, $CSSAttributeValue)
+							}
+						}
+					}
+				}
+			}
+		}
+		# Return the XML
+		$XmlString = $Xml.Document.ToString()
+		if ($NestedTable -and $XmlString.StartsWith("<table>`r`n") -and $XmlString.EndsWith("`r`n</table>")) {
+			$XmlString.Substring(11, $XmlString.Length - 21)
+		} else {
+			$XmlString
+		}
+	}
 }
