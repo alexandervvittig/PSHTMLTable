@@ -1,23 +1,52 @@
-PSTOPIC
+TOPIC
     about_PSHTMLTable
 
 SHORT DESCRIPTION
-    This is a set of functions used to generate HTML tables, and highlight cells within them on demand.
+	PowerShell module to generate HTML tables from an object or list and add inline CSS to them on demand.
 
-DETAILED DESCRIPTION
-    This is a set of functions used to generate HTML tables, and highlight cells within them on demand.
+LONG DESCRIPTION
+	PowerShell module to generate HTML tables from an object or list and add inline CSS to them on demand.
 
-    You can use and combine several functions to create HTML pages:
+	This module is a modified version of HTMLTable originally developed by Warren Frame ("RamblingCookieMonster"). It has been enhanced to include the following additional features:
+
+    * Ability to compare 2 cells within the same row and add CSS attributes to cell, reference cell, or the entire row
+    * Ability to add any CSS attributes to tables and id and class tags to rows, and cells
+    * Ability to nest multiple tables within a single container table
+    * Ability to use "HtmlDecode" on a per table or global page basis
+    * Ability to format cells after evaluation
+    * Ability to remove "<colgroup></colgroup>" tag
+    * Ability to add "<thead></thead>", "<tbody></tbody>", and "<tfoot></tfoot>" tags
+    * Updated version number to 1.0.0.0 to avoid conflicts with predecessor
+    * Original parameter names can be used for backwards compatibility, see ** BREAKING CHANGE **
+    * Separated code from examples to keep code cleaner
+    * Theme support
+    * Pester Tests
+
+    ** BREAKING CHANGE **
+    New-HTMLTable Parameters -HTMLDecode and -SetAlternating have been changed to Switch type instead of Boolean type.
+    If you are a previous user to PSHTMLTable and you're switching to this version, you'll need to replace -HTMLDecode $true and -SetAlternating $true to -HTMLDecode and -SetAlternating.
+    Alternatively, if you use -HTMLDecode $false or -SetAlternating $false you can remove them.
+
+    You can use and combine several functions to create complete HTML pages:
     
-    * New-HTMLHead - Starts building HTML including internal style sheet (leaves body, html tags open)
-    * New-HTMLTable - Create an HTML table from one or more objects
-    * Add-HTMLTableColor - Colorize cells or rows in an HTML table, or add other inline CSS
-    * CloseHTML - Close out the body and html tags
-    * ConvertTo-PropertyValue - Convert an object with various properties into an array of property,value pairs
+    * New-HTMLHead - Starts building the HTML document and includes internal CSS, specified CSS, or theme (leaves body, html tags open)
+    * New-HTMLTable - Creates an HTML table from one or more objects
+    * Add-HTMLTableColor - Colorize cells or rows in an HTML table, or add other inline CSS based on user defined criteria
+    * Close-HTML - Close out the body and html tags
+    * ConvertTo-HTMLPropertyValue - Convert an object with various properties into an array of property, value pairs
+
+    New-HTMLTable just creates a table, not the full HTML around it, thus allowing you to build multiple tables per page.
+
+EXAMPLES
+    Sample scripts can be found in the "Examples" folder off of the module's root path
     
-    Note that these should work together.  New-HTMLTable just creates a table, not the full HTML around it, thus allowing you to build multiple tables per page.
-
-    See Get-Help New-HTMLHead -Full to see a variety of examples, including the use of all functions together.
-
+KEYWORDS
+	HTML
+	Table
+	Color
+	Mail
+	Report
+	Webpage
+	
 LINK
-    https://github.com/RamblingCookieMonster/PSHTMLTable
+    https://github.com/saidbrandon/PSHTMLTable
