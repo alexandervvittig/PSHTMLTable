@@ -12,7 +12,7 @@ This module is a modified version of HTMLTable / PSHTMLTable originally develope
     * Ability to format cells after evaluation
     * Ability to remove "<colgroup></colgroup>" tag
     * Ability to add "<thead></thead>", "<tbody></tbody>", and "<tfoot></tfoot>" tags
-    *	Updated version number to 1.0.0.0 to avoid conflicts with predecessor
+    * Updated version number to 1.0.0.0 to avoid conflicts with predecessor
     * Original parameter names can be used for backwards compatibility, see ** BREAKING CHANGE **
     * Separated code from examples to keep code cleaner
     * Theme support
