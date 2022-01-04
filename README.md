@@ -5,18 +5,18 @@ PowerShell module to generate HTML tables from an object or list and add inline 
 
 This module is a modified version of HTMLTable / PSHTMLTable originally developed by Warren Frame ("RamblingCookieMonster"). It has been enhanced to include the following additional features:
 
-    * 	Ability to compare 2 cells within the same row and add CSS attributes to cell, reference cell, or the entire row
-    * 	Ability to add any CSS attributes to tables and id and class tags to rows, and cells
-    *   Ability to nest multiple tables within a single container table
-    * 	Ability to use "HtmlDecode" on a per table or global page basis
-    *   Ability to format cells after evaluation
-    *   Ability to remove "<colgroup></colgroup>" tag
-    *   Ability to add "<thead></thead>", "<tbody></tbody>", and "<tfoot></tfoot>" tags
+    * Ability to compare 2 cells within the same row and add CSS attributes to cell, reference cell, or the entire row
+    * Ability to add any CSS attributes to tables and id and class tags to rows, and cells
+    * Ability to nest multiple tables within a single container table
+    * Ability to use "HtmlDecode" on a per table or global page basis
+    * Ability to format cells after evaluation
+    * Ability to remove "<colgroup></colgroup>" tag
+    * Ability to add "<thead></thead>", "<tbody></tbody>", and "<tfoot></tfoot>" tags
     *	Updated version number to 1.0.0.0 to avoid conflicts with predecessor
-    *   Original parameter names can be used for backwards compatibility, see ** BREAKING CHANGE **
-    *   Separated code from examples to keep code cleaner
-    *   Theme support
-    *   Pester Tests
+    * Original parameter names can be used for backwards compatibility, see ** BREAKING CHANGE **
+    * Separated code from examples to keep code cleaner
+    * Theme support
+    * Pester Tests
 
     ** BREAKING CHANGE **
     New-HTMLTable Parameters -HTMLDecode and -SetAlternating have been changed to Switch type instead of Boolean type.
