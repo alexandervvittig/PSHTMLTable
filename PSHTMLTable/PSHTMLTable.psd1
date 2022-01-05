@@ -86,10 +86,10 @@
              Tags = @('HTML', 'Table', 'Color', 'Mail', 'Report', 'Webpage')
     
             # A URL to the license for this module.
-             LicenseUri = 'NONE'
+             LicenseUri = 'https://github.com/saidbrandon/PSHTMLTable/blob/development/LICENSE'
     
             # A URL to the main website for this project.
-             ProjectUri = 'NONE'
+             ProjectUri = 'https://github.com/saidbrandon/PSHTMLTable/tree/development'
     
             # A URL to an icon representing this module.
             # IconUri = ''
