@@ -15,15 +15,15 @@ param (
 
 process {
     function Get-LocalTime ($UTCTime) {
-        $CurrentTimeZone = (Get-CimInstance -ClassWin32_TimeZone).StandardName
+        $CurrentTimeZone = (Get-CimInstance -Class Win32_TimeZone).StandardName
         $TimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById($CurrentTimeZone)
         [System.TimeZoneInfo]::ConvertTimeFromUtc($UTCTime, $TimeZone)
     }
 
     # Test for connection
     if ($null -eq $WSUS) {
-        # No connection detected, load assembly
-        [void][reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration")
+        # No connection detected, load assembly. Requires RSAT to be installed if run remotely.
+        Add-Type -Path 'C:\Program Files\Update Services\Api\Microsoft.UpdateServices.Administration.dll' | Out-Null
     }
 
     # Connect to WSUS server
@@ -124,7 +124,7 @@ process {
     if ($SendEmail) {
         # Send HTML to recipient(s)
         try {
-            Send-MailMessage –From $FromAddress –To $RecipientAddress –Subject "$ComputerName - WSUS Status Report" –Body $HTML -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort
+            Send-MailMessage -From $FromAddress -To $RecipientAddress -Subject "$ComputerName - WSUS Status Report" -Body $HTML -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort
         } catch {
             throw $_
         }

@@ -182,7 +182,7 @@ Describe "$ModuleName Get-DhcpScopeUsage Example Tests"  {
         } -ParameterFilter {$ScopeId -eq "192.168.9.0"}
         $ScopesArray = @()
         $Scopes = Get-DHCPServerv4Scope -ComputerName $ComputerName
-        #Assert-MockCalled –CommandName 'Get-DHCPServerv4Scope' –Times 1 –Scope It
+        #Assert-MockCalled -CommandName 'Get-DHCPServerv4Scope' -Times 1 -Scope It
         #$Scopes.Count | Should -Be 10
         foreach ($Scope in $Scopes) {
             $Statistics = Get-DhcpServerv4ScopeStatistics -ComputerName $ComputerName -ScopeId $Scope.ScopeId
@@ -204,7 +204,7 @@ Describe "$ModuleName Get-DhcpScopeUsage Example Tests"  {
         }
     }
     It 'validates example script output' {
-        #Assert-MockCalled –CommandName 'Get-DhcpServerv4Reservation' –Times 10 –Scope It
+        #Assert-MockCalled -CommandName 'Get-DhcpServerv4Reservation' -Times 10 -Scope It
         #$ScopesArray | Should -BeNullOrEmpty
         $HTML = New-HTMLHead -Style $MyCSS
         $HTMLTable = $ScopesArray | Sort-Object Id | New-HTMLTable -HTMLDecode -SetAlternating

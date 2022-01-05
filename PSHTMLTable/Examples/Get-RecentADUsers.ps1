@@ -40,7 +40,7 @@ process {
         if ($SendEmail) {
             # Send HTML to recipient(s)
             try {
-                Send-MailMessage –From $FromAddress –To $RecipientAddress –Subject "$ComputerName - New User Report" –Body $HTML -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort
+                Send-MailMessage -From $FromAddress -To $RecipientAddress -Subject "$ComputerName - New User Report" -Body $HTML -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort
             } catch {
                 throw $_
             }
